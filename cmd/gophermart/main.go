@@ -13,10 +13,9 @@ import (
 )
 
 type Config struct {
-	ServerAddress   string `env:"SERVER_ADDRESS" envDefault:":8080"`
-	BaseURL         string `env:"BASE_URL" envDefault:"http://localhost:8080"`
-	FileStoragePath string `env:"FILE_STORAGE_PATH" envDefault:"urls.json"`
-	DatabaseURL     string `env:"DATABASE_DSN" envDefault:"postgres://abayken:password@localhost:5432/gophermart"`
+	RunAddress     string `env:"RUN_ADDRESS" envDefault:":8080"`
+	DatabaseURL    string `env:"DATABASE_URI" envDefault:"postgres://abayken:password@localhost:5432/gophermart"`
+	AccuralAddress string `env:"ACCURAL_SYSTEM_ADDRESS"`
 }
 
 func main() {
@@ -28,34 +27,16 @@ func main() {
 		log.Fatal(err)
 	}
 
-	flag.StringVar(&cfg.ServerAddress, "a", cfg.ServerAddress, "Адресс сервера")
-	flag.StringVar(&cfg.BaseURL, "b", cfg.BaseURL, "BaseURL сокращенного урла")
-	flag.StringVar(&cfg.FileStoragePath, "f", cfg.FileStoragePath, "Путь до файла где хранятся урлы")
+	flag.StringVar(&cfg.RunAddress, "a", cfg.RunAddress, "Адресс сервера")
 	flag.StringVar(&cfg.DatabaseURL, "d", cfg.DatabaseURL, "Урл базы данных")
 
 	flag.Parse()
 
-	//var storage = getDatabaseStorage(cfg.DatabaseURL)
-
 	router := GetRouter(cfg)
-	router.Run(cfg.ServerAddress)
+	router.Run(cfg.RunAddress)
 }
 
-// func getDatabaseStorage(url string) storage.DatabaseStorage {
-// 	conn, err := pgx.Connect(context.Background(), url)
-
-// 	if err != nil {
-// 		log.Fatal(err)
-// 	}
-
-// 	var storage = storage.DatabaseStorage{DB: conn}
-// 	storage.InitTablesIfNeeded()
-
-// 	return storage
-// }
-
 func GetRouter(cfg Config) *gin.Engine {
-	//handler := handlers.URLHandler{Storage: storage, URLShortener: urlShortener, BaseURL: cfg.BaseURL}
 	router := gin.New()
 
 	storage := database.NewStorage(cfg.DatabaseURL)
@@ -64,17 +45,6 @@ func GetRouter(cfg Config) *gin.Engine {
 	handler := handlers.Handler{AuthUseCase: authUseCase}
 
 	router.POST("/api/user/register", handler.RegisterUser)
-	// router.Use(gzip.Gzip(gzip.BestSpeed, gzip.WithDecompressFn(gzip.DefaultDecompressHandle)))
-	// router.Use(Tokenize())
-	// router.GET("/:id", handler.GetFullURL)
-	// router.POST("/", handler.PostFullURL)
-	// router.POST("/api/shorten", handler.PostAPIFullURL)
-	// router.POST("/api/shorten/batch", handler.BatchURLS)
-	// router.GET("/api/user/urls", handler.GetUserURLs)
-	// router.DELETE("/api/user/urls", handler.DeleteUserURLs)
-
-	//health := handlers.Health{DatabaseURL: cfg.DatabaseURL}
-	//router.GET("/ping", health.CheckDatabase)
 
 	return router
 }
