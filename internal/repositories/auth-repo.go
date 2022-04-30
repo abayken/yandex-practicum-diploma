@@ -10,6 +10,12 @@ type AuthRepository struct {
 	Storage *database.DatabaseStorage
 }
 
+type User struct {
+	Id       int
+	Login    string
+	Password string
+}
+
 func (repo *AuthRepository) Exists(login string) (bool, error) {
 	db := repo.Storage.DB
 
@@ -30,4 +36,14 @@ func (repo *AuthRepository) Create(login, password string) (int, error) {
 	err := db.QueryRow(context.Background(), "INSERT INTO USERS (LOGIN, PASSWORD) VALUES ($1, $2) RETURNING ID;", login, password).Scan(&id)
 
 	return id, err
+}
+
+func (repo *AuthRepository) Get(login, password string) (User, error) {
+	db := repo.Storage.DB
+
+	var user User
+
+	err := db.QueryRow(context.Background(), "SELECT ID, LOGIN, PASSWORD FROM USERS WHERE LOGIN = $1", login).Scan(&user.Id, &user.Login, &user.Password)
+
+	return user, err
 }

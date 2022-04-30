@@ -45,6 +45,7 @@ func GetRouter(cfg Config) *gin.Engine {
 	handler := handlers.Handler{AuthUseCase: authUseCase}
 
 	router.POST("/api/user/register", handler.RegisterUser)
+	router.POST("/api/user/login", handler.LoginUser)
 
 	return router
 }

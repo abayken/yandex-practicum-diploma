@@ -41,6 +41,36 @@ func (handler *Handler) RegisterUser(ctx *gin.Context) {
 	}
 
 	ctx.SetCookie("token", token, 3600, "/", "localhost", false, true)
+	ctx.Status(http.StatusOK)
+}
 
+func (handler *Handler) LoginUser(ctx *gin.Context) {
+	type Request struct {
+		Login    string `json:"login"`
+		Password string `json:"password"`
+	}
+
+	var request Request
+
+	if err := ctx.BindJSON(&request); err != nil {
+		ctx.Status(http.StatusBadRequest)
+
+		return
+	}
+
+	token, err := handler.AuthUseCase.Login(request.Login, request.Password)
+
+	if err != nil {
+		var invalidCredsError *custom_errors.InvalidCredentialsError
+		if errors.As(err, &invalidCredsError) {
+			ctx.Status(http.StatusUnauthorized)
+		} else {
+			ctx.Status(http.StatusInternalServerError)
+		}
+
+		return
+	}
+
+	ctx.SetCookie("token", token, 3600, "/", "localhost", false, true)
 	ctx.Status(http.StatusOK)
 }
