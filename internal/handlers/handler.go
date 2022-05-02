@@ -187,8 +187,8 @@ func (handler *Handler) Balance(ctx *gin.Context) {
 
 func (handler *Handler) Withdraw(ctx *gin.Context) {
 	type Request struct {
-		Order string `json:"order"`
-		Sum   int    `json:"sum"`
+		Order string  `json:"order"`
+		Sum   float32 `json:"sum"`
 	}
 
 	var request Request
@@ -200,7 +200,7 @@ func (handler *Handler) Withdraw(ctx *gin.Context) {
 	}
 
 	userID := ctx.GetInt("userID")
-	err := handler.WithdrawUseCase.Withdraw(userID, request.Order, request.Sum)
+	err := handler.WithdrawUseCase.Withdraw(userID, request.Order, int(request.Sum))
 
 	if err != nil {
 		var invalidOrderNumberError *custom_errors.InvalidOrderNumber
