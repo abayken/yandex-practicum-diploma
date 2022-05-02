@@ -94,3 +94,12 @@ func (repo OrdersRepository) GetNotFinishedOrders(userID int) ([]Order, error) {
 
 	return orders, nil
 }
+
+func (repo OrdersRepository) GetAccrualSum(userID int) (int, error) {
+	db := repo.Storage.DB
+
+	var sum int
+	err := db.QueryRow(context.Background(), "SELECT SUM(ACCRUAL) FROM ORDERS WHERE USER_ID = $1 AND STATUS = 'PROCESSED';", userID).Scan(&sum)
+
+	return sum, err
+}

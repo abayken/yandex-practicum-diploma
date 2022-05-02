@@ -8,8 +8,10 @@ import (
 )
 
 type AuthUseCase struct {
-	Repository repositories.AuthRepository
-	Creds      creds.Creds
+	Repository    repositories.AuthRepository
+	Creds         creds.Creds
+	OrdersRepo    repositories.OrdersRepository
+	WithdrawsRepo repositories.WithdrawRepository
 }
 
 func (usecase AuthUseCase) Register(login, password string) (string, error) {
@@ -52,4 +54,25 @@ func (usecase AuthUseCase) Login(login, password string) (string, error) {
 			return "", err
 		}
 	}
+}
+
+type Balance struct {
+	Current        int
+	TotalWithdrawn int
+}
+
+func (usecase AuthUseCase) GetBalance(userID int) (*Balance, error) {
+	accrualSum, err := usecase.OrdersRepo.GetAccrualSum(userID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	withdrawnSum, err := usecase.WithdrawsRepo.GetTotalSumOfWithdrawn(userID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &Balance{Current: accrualSum - withdrawnSum, TotalWithdrawn: withdrawnSum}, nil
 }

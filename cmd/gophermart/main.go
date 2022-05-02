@@ -4,6 +4,7 @@ import (
 	"flag"
 	"log"
 
+	"github.com/abayken/yandex-practicum-diploma/internal/creds"
 	"github.com/abayken/yandex-practicum-diploma/internal/database"
 	"github.com/abayken/yandex-practicum-diploma/internal/handlers"
 	"github.com/abayken/yandex-practicum-diploma/internal/repositories"
@@ -42,9 +43,15 @@ func GetRouter(cfg Config) *gin.Engine {
 
 	storage := database.NewStorage(cfg.DatabaseURL)
 	authRepository := repositories.AuthRepository{Storage: storage}
-	authUseCase := usecases.AuthUseCase{Repository: authRepository}
-
 	ordersRepo := repositories.OrdersRepository{Storage: storage}
+	withdrawsRepo := repositories.WithdrawRepository{Storage: storage}
+	authUseCase := usecases.AuthUseCase{
+		Repository:    authRepository,
+		Creds:         creds.Creds{},
+		OrdersRepo:    ordersRepo,
+		WithdrawsRepo: withdrawsRepo,
+	}
+
 	ordersUseCase := usecases.OrderUseCase{Repo: ordersRepo}
 	handler := handlers.Handler{AuthUseCase: authUseCase, OrdersUseCase: ordersUseCase}
 
@@ -60,6 +67,7 @@ func GetRouter(cfg Config) *gin.Engine {
 
 	authorized.POST("/api/user/orders", handler.AddOrder)
 	authorized.GET("/api/user/orders", handler.Orders)
+	authorized.GET("/api/user/balance", handler.Balance)
 
 	return router
 }

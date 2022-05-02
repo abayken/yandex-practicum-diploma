@@ -13,8 +13,9 @@ import (
 )
 
 type Handler struct {
-	AuthUseCase   usecases.AuthUseCase
-	OrdersUseCase usecases.OrderUseCase
+	AuthUseCase     usecases.AuthUseCase
+	OrdersUseCase   usecases.OrderUseCase
+	WithdrawUseCase usecases.WithdrawUseCase
 }
 
 func (handler *Handler) RegisterUser(ctx *gin.Context) {
@@ -163,4 +164,41 @@ func (handler *Handler) Orders(ctx *gin.Context) {
 	} else {
 		ctx.JSON(http.StatusOK, response)
 	}
+}
+
+func (handler *Handler) Balance(ctx *gin.Context) {
+	type BalanceView struct {
+		Current   int `json:"current"`
+		Withdrawn int `json:"withdrawn"`
+	}
+
+	userID := ctx.GetInt("userID")
+
+	balance, err := handler.AuthUseCase.GetBalance(userID)
+
+	if err != nil {
+		ctx.Status(http.StatusInternalServerError)
+
+		return
+	}
+
+	ctx.JSON(http.StatusOK, BalanceView{Current: balance.Current, Withdrawn: balance.TotalWithdrawn})
+}
+
+func (handler *Handler) Withdraw(ctx *gin.Context) {
+	type Request struct {
+		Order string  `json:"order"`
+		Sum   float64 `json:"sum"`
+	}
+
+	var request Request
+
+	if err := ctx.BindJSON(&request); err != nil {
+		ctx.Status(http.StatusBadRequest)
+
+		return
+	}
+
+	//userID := ctx.GetInt("userID")
+
 }
