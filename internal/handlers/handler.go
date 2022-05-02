@@ -2,7 +2,9 @@ package handlers
 
 import (
 	"errors"
+	"io/ioutil"
 	"net/http"
+	"strconv"
 
 	"github.com/abayken/yandex-practicum-diploma/internal/custom_errors"
 	"github.com/abayken/yandex-practicum-diploma/internal/usecases"
@@ -10,7 +12,8 @@ import (
 )
 
 type Handler struct {
-	AuthUseCase usecases.AuthUseCase
+	AuthUseCase   usecases.AuthUseCase
+	OrdersUseCase usecases.OrderUseCase
 }
 
 func (handler *Handler) RegisterUser(ctx *gin.Context) {
@@ -73,4 +76,56 @@ func (handler *Handler) LoginUser(ctx *gin.Context) {
 
 	ctx.SetCookie("token", token, 3600, "/", "localhost", false, true)
 	ctx.Status(http.StatusOK)
+}
+
+/// Обработчик /api/user/orders
+func (handler *Handler) AddOrder(ctx *gin.Context) {
+	body, err := ioutil.ReadAll(ctx.Request.Body)
+
+	if err != nil {
+		ctx.Status(http.StatusInternalServerError)
+
+		return
+	}
+
+	orderNumber, err := strconv.Atoi(string(body))
+
+	if err != nil {
+		ctx.Status(http.StatusInternalServerError)
+
+		return
+	}
+
+	userID := ctx.GetInt("userID")
+
+	added, err := handler.OrdersUseCase.Add(userID, orderNumber)
+
+	if added {
+		ctx.Status(http.StatusAccepted)
+
+		return
+	}
+
+	if err != nil {
+		var invalidOrderNumberError *custom_errors.InvalidOrderNumber
+		var orderAlreadyAddedError *custom_errors.OrderAlreadyAddedError
+
+		if errors.As(err, &invalidOrderNumberError) {
+			ctx.Status(http.StatusUnprocessableEntity)
+
+			return
+		}
+
+		if errors.As(err, &orderAlreadyAddedError) {
+			if orderAlreadyAddedError.UserID == userID {
+				ctx.Status(http.StatusOK)
+			} else {
+				ctx.Status(http.StatusConflict)
+			}
+
+			return
+		}
+
+		ctx.Status(http.StatusInternalServerError)
+	}
 }

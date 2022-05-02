@@ -1,17 +1,16 @@
 package usecases
 
 import (
+	"github.com/abayken/yandex-practicum-diploma/internal/creds"
 	"github.com/abayken/yandex-practicum-diploma/internal/custom_errors"
 	"github.com/abayken/yandex-practicum-diploma/internal/repositories"
-	"github.com/brianvoe/sjwt"
 	"github.com/jackc/pgx/v4"
 )
 
 type AuthUseCase struct {
 	Repository repositories.AuthRepository
+	Creds      creds.Creds
 }
-
-const jwtKey = "diploma"
 
 func (usecase AuthUseCase) Register(login, password string) (string, error) {
 	exists, err := usecase.Repository.Exists(login)
@@ -29,10 +28,7 @@ func (usecase AuthUseCase) Register(login, password string) (string, error) {
 			return "", err
 		}
 
-		claims := sjwt.New()
-		claims.Set("login", login)
-		claims.Set("id", id)
-		jwt := claims.Generate([]byte(jwtKey))
+		jwt := usecase.Creds.BuildJWT(creds.UserModel{Login: login, Id: id})
 
 		return jwt, nil
 	}
@@ -43,10 +39,7 @@ func (usecase AuthUseCase) Login(login, password string) (string, error) {
 
 	if err == nil {
 		if user.Login == login && user.Password == password {
-			claims := sjwt.New()
-			claims.Set("login", user.Login)
-			claims.Set("id", user.Id)
-			jwt := claims.Generate([]byte(jwtKey))
+			jwt := usecase.Creds.BuildJWT(creds.UserModel{Login: user.Login, Id: user.Id})
 
 			return jwt, nil
 		} else {

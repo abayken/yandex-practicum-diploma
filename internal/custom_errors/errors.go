@@ -13,3 +13,18 @@ type InvalidCredentialsError struct {
 func (error *InvalidCredentialsError) Error() string {
 	return "Incorrect pair of credentials"
 }
+
+type InvalidOrderNumber struct {
+}
+
+func (error *InvalidOrderNumber) Error() string {
+	return "Invalid order number"
+}
+
+type OrderAlreadyAddedError struct {
+	UserID int
+}
+
+func (error *OrderAlreadyAddedError) Error() string {
+	return "Order added already"
+}

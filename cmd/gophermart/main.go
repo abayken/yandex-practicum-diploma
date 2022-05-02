@@ -42,10 +42,19 @@ func GetRouter(cfg Config) *gin.Engine {
 	storage := database.NewStorage(cfg.DatabaseURL)
 	authRepository := repositories.AuthRepository{Storage: storage}
 	authUseCase := usecases.AuthUseCase{Repository: authRepository}
-	handler := handlers.Handler{AuthUseCase: authUseCase}
+
+	ordersRepo := repositories.OrdersRepository{Storage: storage}
+	ordersUseCase := usecases.OrderUseCase{Repo: ordersRepo}
+	handler := handlers.Handler{AuthUseCase: authUseCase, OrdersUseCase: ordersUseCase}
 
 	router.POST("/api/user/register", handler.RegisterUser)
 	router.POST("/api/user/login", handler.LoginUser)
+
+	authorized := router.Group("/")
+
+	authorized.Use(SetUserID())
+
+	authorized.POST("/api/user/orders", handler.AddOrder)
 
 	return router
 }
