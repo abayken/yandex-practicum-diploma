@@ -99,7 +99,7 @@ func (repo OrdersRepository) GetAccrualSum(userID int) (int, error) {
 	db := repo.Storage.DB
 
 	var sum int
-	err := db.QueryRow(context.Background(), "SELECT SUM(ACCRUAL) FROM ORDERS WHERE USER_ID = $1 AND STATUS = 'PROCESSED';", userID).Scan(&sum)
+	err := db.QueryRow(context.Background(), "SELECT COALESCE(SUM(ACCRUAL), 0) FROM ORDERS WHERE USER_ID = $1 AND STATUS = 'PROCESSED';", userID).Scan(&sum)
 
 	return sum, err
 }

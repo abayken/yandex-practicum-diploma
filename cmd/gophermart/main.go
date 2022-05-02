@@ -15,9 +15,9 @@ import (
 )
 
 type Config struct {
-	RunAddress     string `env:"RUN_ADDRESS" envDefault:":8080"`
+	RunAddress     string `env:"RUN_ADDRESS" envDefault:"127.0.0.1:8080"`
 	DatabaseURL    string `env:"DATABASE_URI" envDefault:"postgres://abayken:password@localhost:5432/gophermart"`
-	AccuralAddress string `env:"ACCURAL_SYSTEM_ADDRESS" envDefault:"localhost:8080"`
+	AccuralAddress string `env:"ACCRUAL_SYSTEM_ADDRESS" envDefault:"http://127.0.0.1:8080"`
 }
 
 func main() {
@@ -72,6 +72,7 @@ func GetRouter(cfg Config) *gin.Engine {
 
 	router.POST("/api/user/register", handler.RegisterUser)
 	router.POST("/api/user/login", handler.LoginUser)
+	router.GET("/api/orders/:number", handler.FakeAccural)
 
 	authorized := router.Group("/")
 

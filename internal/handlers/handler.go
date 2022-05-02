@@ -219,3 +219,13 @@ func (handler *Handler) Withdraw(ctx *gin.Context) {
 
 	ctx.Status(http.StatusOK)
 }
+
+func (hander *Handler) FakeAccural(ctx *gin.Context) {
+	type Response struct {
+		Order   string `json:"order"`
+		Status  string `json:"status"`
+		Accrual string `json:"accrual,omitempty"`
+	}
+
+	ctx.JSON(http.StatusOK, Response{Order: ctx.Param("number"), Status: "INVALID"})
+}
