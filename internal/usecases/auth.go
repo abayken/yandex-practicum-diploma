@@ -57,8 +57,8 @@ func (usecase AuthUseCase) Login(login, password string) (string, error) {
 }
 
 type Balance struct {
-	Current        int
-	TotalWithdrawn int
+	Current        float32
+	TotalWithdrawn float32
 }
 
 func (usecase AuthUseCase) GetBalance(userID int) (*Balance, error) {

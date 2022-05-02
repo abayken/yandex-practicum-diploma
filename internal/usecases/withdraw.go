@@ -15,7 +15,7 @@ type WithdrawUseCase struct {
 	Luhn          helpers.LuhnChecker
 }
 
-func (usecase WithdrawUseCase) Withdraw(userID int, orderNumber string, sum int) error {
+func (usecase WithdrawUseCase) Withdraw(userID int, orderNumber string, sum float32) error {
 	balance, err := usecase.UserUseCase.GetBalance(userID)
 
 	if err != nil {

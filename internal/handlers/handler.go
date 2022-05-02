@@ -168,8 +168,8 @@ func (handler *Handler) Orders(ctx *gin.Context) {
 
 func (handler *Handler) Balance(ctx *gin.Context) {
 	type BalanceView struct {
-		Current   int `json:"current"`
-		Withdrawn int `json:"withdrawn"`
+		Current   float32 `json:"current"`
+		Withdrawn float32 `json:"withdrawn"`
 	}
 
 	userID := ctx.GetInt("userID")
@@ -200,7 +200,7 @@ func (handler *Handler) Withdraw(ctx *gin.Context) {
 	}
 
 	userID := ctx.GetInt("userID")
-	err := handler.WithdrawUseCase.Withdraw(userID, request.Order, int(request.Sum))
+	err := handler.WithdrawUseCase.Withdraw(userID, request.Order, request.Sum)
 
 	if err != nil {
 		var invalidOrderNumberError *custom_errors.InvalidOrderNumber
@@ -222,10 +222,10 @@ func (handler *Handler) Withdraw(ctx *gin.Context) {
 
 func (hander *Handler) FakeAccural(ctx *gin.Context) {
 	type Response struct {
-		Order   string `json:"order"`
-		Status  string `json:"status"`
-		Accrual string `json:"accrual,omitempty"`
+		Order   string  `json:"order"`
+		Status  string  `json:"status"`
+		Accrual float32 `json:"accrual,omitempty"`
 	}
 
-	ctx.JSON(http.StatusOK, Response{Order: ctx.Param("number"), Status: "INVALID"})
+	ctx.JSON(http.StatusOK, Response{Order: ctx.Param("number"), Status: "PROCESSED", Accrual: 40.5})
 }
