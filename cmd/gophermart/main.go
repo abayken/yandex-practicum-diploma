@@ -55,6 +55,7 @@ func GetRouter(cfg Config) *gin.Engine {
 	authorized.Use(SetUserID())
 
 	authorized.POST("/api/user/orders", handler.AddOrder)
+	authorized.GET("/api/user/orders", handler.Orders)
 
 	return router
 }

@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/abayken/yandex-practicum-diploma/internal/database"
+	"github.com/jackc/pgtype"
 )
 
 type OrdersRepository struct {
@@ -11,8 +12,10 @@ type OrdersRepository struct {
 }
 
 type Order struct {
-	UserID int
-	Number string
+	UserID  int
+	Number  string
+	Status  string
+	AddedAt pgtype.Timestamp
 }
 
 func (repo OrdersRepository) GetOrder(userID int, orderNumber string) (Order, error) {
@@ -31,4 +34,30 @@ func (repo OrdersRepository) AddOrder(userID int, orderNumber, status string) er
 	_, err := db.Exec(context.Background(), "INSERT INTO ORDERS (USER_ID, NUMBER, STATUS) VALUES ($1, $2, $3)", userID, orderNumber, status)
 
 	return err
+}
+
+func (repo OrdersRepository) GetOrders(userID int) ([]Order, error) {
+	db := repo.Storage.DB
+
+	rows, err := db.Query(context.Background(), "SELECT NUMBER, STATUS, ADDED_AT FROM ORDERS WHERE USER_ID = $1", userID)
+
+	defer rows.Close()
+
+	if err != nil {
+		return nil, err
+	}
+
+	orders := []Order{}
+
+	for rows.Next() {
+		var order Order
+
+		err := rows.Scan(&order.Number, &order.Status, &order.AddedAt)
+
+		if err == nil {
+			orders = append(orders, order)
+		}
+	}
+
+	return orders, nil
 }

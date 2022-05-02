@@ -37,3 +37,7 @@ func (usecase OrderUseCase) Add(userID, orderNumber int) (bool, error) {
 
 	return false, &custom_errors.OrderAlreadyAddedError{UserID: order.UserID}
 }
+
+func (usecase OrderUseCase) GetOrders(userID int) ([]repositories.Order, error) {
+	return usecase.Repo.GetOrders(userID)
+}

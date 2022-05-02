@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/abayken/yandex-practicum-diploma/internal/custom_errors"
 	"github.com/abayken/yandex-practicum-diploma/internal/usecases"
@@ -127,5 +128,39 @@ func (handler *Handler) AddOrder(ctx *gin.Context) {
 		}
 
 		ctx.Status(http.StatusInternalServerError)
+	}
+}
+
+func (handler *Handler) Orders(ctx *gin.Context) {
+	userID := ctx.GetInt("userID")
+	orders, err := handler.OrdersUseCase.GetOrders(userID)
+
+	type OrderView struct {
+		Number     string `json:"number"`
+		Status     string `json:"status"`
+		Accural    string `json:"accural,omitempty"`
+		UploadedAt string `json:"uploaded_at"`
+	}
+
+	if err != nil {
+		ctx.Status(http.StatusInternalServerError)
+
+		return
+	}
+
+	var response []OrderView
+
+	for _, order := range orders {
+		response = append(response, OrderView{
+			Number:     order.Number,
+			Status:     order.Status,
+			UploadedAt: order.AddedAt.Time.Format(time.RFC3339),
+		})
+	}
+
+	if response == nil {
+		ctx.Status(http.StatusNoContent)
+	} else {
+		ctx.JSON(http.StatusOK, response)
 	}
 }
