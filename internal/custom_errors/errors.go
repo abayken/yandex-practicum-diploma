@@ -28,3 +28,10 @@ type OrderAlreadyAddedError struct {
 func (error *OrderAlreadyAddedError) Error() string {
 	return "Order added already"
 }
+
+type InsufficientFundsError struct {
+}
+
+func (error *InsufficientFundsError) Error() string {
+	return "Insufficient funds"
+}

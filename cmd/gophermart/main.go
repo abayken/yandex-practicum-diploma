@@ -7,6 +7,7 @@ import (
 	"github.com/abayken/yandex-practicum-diploma/internal/creds"
 	"github.com/abayken/yandex-practicum-diploma/internal/database"
 	"github.com/abayken/yandex-practicum-diploma/internal/handlers"
+	"github.com/abayken/yandex-practicum-diploma/internal/helpers"
 	"github.com/abayken/yandex-practicum-diploma/internal/repositories"
 	"github.com/abayken/yandex-practicum-diploma/internal/usecases"
 	"github.com/caarlos0/env/v6"
@@ -53,7 +54,18 @@ func GetRouter(cfg Config) *gin.Engine {
 	}
 
 	ordersUseCase := usecases.OrderUseCase{Repo: ordersRepo}
-	handler := handlers.Handler{AuthUseCase: authUseCase, OrdersUseCase: ordersUseCase}
+	withdrawUseCase := usecases.WithdrawUseCase{
+		OrdersRepo:    ordersRepo,
+		WithdrawsRepo: withdrawsRepo,
+		UserUseCase:   authUseCase,
+		Luhn:          helpers.LuhnChecker{},
+	}
+
+	handler := handlers.Handler{
+		AuthUseCase:     authUseCase,
+		OrdersUseCase:   ordersUseCase,
+		WithdrawUseCase: withdrawUseCase,
+	}
 
 	accrualRepo := repositories.AccrualRepository{BaseURL: cfg.AccuralAddress}
 	accrualUseCase := usecases.AccrualUseCase{OrdersRepository: ordersRepo, AccrualRepository: accrualRepo}
@@ -68,6 +80,7 @@ func GetRouter(cfg Config) *gin.Engine {
 	authorized.POST("/api/user/orders", handler.AddOrder)
 	authorized.GET("/api/user/orders", handler.Orders)
 	authorized.GET("/api/user/balance", handler.Balance)
+	authorized.POST("/api/user/balance/withdraw", handler.Withdraw)
 
 	return router
 }

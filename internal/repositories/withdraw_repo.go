@@ -18,3 +18,9 @@ func (repo WithdrawRepository) GetTotalSumOfWithdrawn(userID int) (int, error) {
 
 	return sum, err
 }
+
+func (repo WithdrawRepository) Add(userID int, sum int, orderNumber string) error {
+	_, err := repo.Storage.DB.Exec(context.Background(), "INSERT INTO TRANSACTIONS (USER_ID, ORDER_NUMBER, SUM) VALUES ($1, $2, $3)", userID, orderNumber, sum)
+
+	return err
+}

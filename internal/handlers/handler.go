@@ -187,8 +187,8 @@ func (handler *Handler) Balance(ctx *gin.Context) {
 
 func (handler *Handler) Withdraw(ctx *gin.Context) {
 	type Request struct {
-		Order string  `json:"order"`
-		Sum   float64 `json:"sum"`
+		Order string `json:"order"`
+		Sum   int    `json:"sum"`
 	}
 
 	var request Request
@@ -199,6 +199,23 @@ func (handler *Handler) Withdraw(ctx *gin.Context) {
 		return
 	}
 
-	//userID := ctx.GetInt("userID")
+	userID := ctx.GetInt("userID")
+	err := handler.WithdrawUseCase.Withdraw(userID, request.Order, request.Sum)
 
+	if err != nil {
+		var invalidOrderNumberError *custom_errors.InvalidOrderNumber
+		var insufficientFundsError *custom_errors.InsufficientFundsError
+
+		if errors.As(err, &invalidOrderNumberError) {
+			ctx.Status(http.StatusUnprocessableEntity)
+		} else if errors.As(err, &insufficientFundsError) {
+			ctx.Status(http.StatusPaymentRequired)
+		} else {
+			ctx.Status(http.StatusInternalServerError)
+		}
+
+		return
+	}
+
+	ctx.Status(http.StatusOK)
 }
