@@ -1,24 +1,53 @@
 package usecases
 
-import "github.com/abayken/yandex-practicum-diploma/internal/repositories"
+import (
+	"github.com/abayken/yandex-practicum-diploma/internal/repositories"
+)
 
 type AccrualUseCase struct {
 	OrdersRepository  repositories.OrdersRepository
 	AccrualRepository repositories.AccrualRepository
 }
 
-func (usecase AccrualUseCase) ActualizeOrders(userID int) {
+func (usecase AccrualUseCase) ActualizeOrders(userID int) error {
 	orders, err := usecase.OrdersRepository.GetNotFinishedOrders(userID)
 
 	if err != nil {
+		return err
+	}
+
+	updated := make(chan error)
+
+	var updateError error
+
+	for _, order := range orders {
+		go usecase.update(updated, order.Number, userID)
+
+		err := <-updated
+
+		if err != nil {
+			updateError = err
+		}
+	}
+
+	return updateError
+}
+
+func (usecase AccrualUseCase) update(updated chan error, orderNumber string, userID int) {
+	orderInfo, err := usecase.AccrualRepository.FetchOrderInfo(orderNumber)
+
+	if err != nil {
+		updated <- err
+
 		return
 	}
 
-	for _, order := range orders {
-		orderInfo, _ := usecase.AccrualRepository.FetchOrderInfo(order.Number)
+	err = usecase.OrdersRepository.Update(
+		userID,
+		orderInfo.Status,
+		int(orderInfo.Accrual),
+		orderInfo.Number,
+	)
 
-		if orderInfo != nil {
-			_ = usecase.OrdersRepository.Update(userID, orderInfo.Status, int(orderInfo.Accrual), orderInfo.Number)
-		}
-	}
+	updated <- err
 }
