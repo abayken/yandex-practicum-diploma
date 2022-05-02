@@ -15,7 +15,7 @@ import (
 type Config struct {
 	RunAddress     string `env:"RUN_ADDRESS" envDefault:":8080"`
 	DatabaseURL    string `env:"DATABASE_URI" envDefault:"postgres://abayken:password@localhost:5432/gophermart"`
-	AccuralAddress string `env:"ACCURAL_SYSTEM_ADDRESS"`
+	AccuralAddress string `env:"ACCURAL_SYSTEM_ADDRESS" envDefault:"localhost:8080"`
 }
 
 func main() {
@@ -29,6 +29,7 @@ func main() {
 
 	flag.StringVar(&cfg.RunAddress, "a", cfg.RunAddress, "Адресс сервера")
 	flag.StringVar(&cfg.DatabaseURL, "d", cfg.DatabaseURL, "Урл базы данных")
+	flag.StringVar(&cfg.AccuralAddress, "r", cfg.AccuralAddress, "Адресс accrual сервиса")
 
 	flag.Parse()
 
@@ -47,12 +48,15 @@ func GetRouter(cfg Config) *gin.Engine {
 	ordersUseCase := usecases.OrderUseCase{Repo: ordersRepo}
 	handler := handlers.Handler{AuthUseCase: authUseCase, OrdersUseCase: ordersUseCase}
 
+	accrualRepo := repositories.AccrualRepository{BaseURL: cfg.AccuralAddress}
+	accrualUseCase := usecases.AccrualUseCase{OrdersRepository: ordersRepo, AccrualRepository: accrualRepo}
+
 	router.POST("/api/user/register", handler.RegisterUser)
 	router.POST("/api/user/login", handler.LoginUser)
 
 	authorized := router.Group("/")
 
-	authorized.Use(SetUserID())
+	authorized.Use(SetUserID(), ActualizeOrders(accrualUseCase))
 
 	authorized.POST("/api/user/orders", handler.AddOrder)
 	authorized.GET("/api/user/orders", handler.Orders)

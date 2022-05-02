@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/abayken/yandex-practicum-diploma/internal/creds"
+	"github.com/abayken/yandex-practicum-diploma/internal/usecases"
 	"github.com/gin-gonic/gin"
 )
 
@@ -24,6 +25,16 @@ func SetUserID() gin.HandlerFunc {
 				ctx.Set("userID", id)
 			}
 		}
+
+		ctx.Next()
+	}
+}
+
+func ActualizeOrders(usecase usecases.AccrualUseCase) gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		userID := ctx.GetInt("userID")
+
+		usecase.ActualizeOrders(userID)
 
 		ctx.Next()
 	}

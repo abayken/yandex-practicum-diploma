@@ -61,3 +61,36 @@ func (repo OrdersRepository) GetOrders(userID int) ([]Order, error) {
 
 	return orders, nil
 }
+
+func (repo OrdersRepository) Update(userID int, status string, accrual int, number string) error {
+	db := repo.Storage.DB
+
+	_, err := db.Exec(context.Background(), "UPDATE ORDERS SET STATUS = $1, ACCRUAL = $2 WHERE NUMBER = $3 AND USER_ID = $4", status, accrual, number, userID)
+
+	return err
+}
+
+func (repo OrdersRepository) GetNotFinishedOrders(userID int) ([]Order, error) {
+	db := repo.Storage.DB
+
+	rows, err := db.Query(context.Background(), "SELECT NUMBER FROM ORDERS WHERE USER_ID = $1 AND STATUS NOT IN ('INVALID', 'PROCESSED')", userID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	var orders []Order
+	for rows.Next() {
+		var order Order
+
+		err := rows.Scan(&order.Number)
+
+		if err == nil {
+			orders = append(orders, order)
+		}
+	}
+
+	return orders, nil
+}
