@@ -36,7 +36,7 @@ func (usecase WithdrawUseCase) Withdraw(userID int, orderNumber string, sum floa
 		return &custom_errors.InvalidOrderNumber{}
 	}
 
-	err = usecase.WithdrawsRepo.Add(userID, sum, orderNumber)
+	err = usecase.WithdrawsRepo.Add(userID, int(sum*100), orderNumber)
 
 	return err
 }

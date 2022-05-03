@@ -74,5 +74,9 @@ func (usecase AuthUseCase) GetBalance(userID int) (*Balance, error) {
 		return nil, err
 	}
 
-	return &Balance{Current: accrualSum - withdrawnSum, TotalWithdrawn: withdrawnSum}, nil
+	return &Balance{
+			Current:        float32(accrualSum-withdrawnSum) / 100,
+			TotalWithdrawn: float32(withdrawnSum) / 100,
+		},
+		nil
 }

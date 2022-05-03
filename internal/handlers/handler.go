@@ -227,5 +227,5 @@ func (hander *Handler) FakeAccural(ctx *gin.Context) {
 		Accrual float32 `json:"accrual,omitempty"`
 	}
 
-	ctx.JSON(http.StatusOK, Response{Order: ctx.Param("number"), Status: "PROCESSED", Accrual: 40.5})
+	ctx.JSON(http.StatusOK, Response{Order: ctx.Param("number"), Status: "PROCESSED", Accrual: 400})
 }

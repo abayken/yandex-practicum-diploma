@@ -45,7 +45,7 @@ func (usecase AccrualUseCase) update(updated chan error, orderNumber string, use
 	err = usecase.OrdersRepository.Update(
 		userID,
 		orderInfo.Status,
-		int(orderInfo.Accrual),
+		int(orderInfo.Accrual*100),
 		orderInfo.Number,
 	)
 
