@@ -37,7 +37,7 @@ func ActualizeOrders(usecase usecases.AccrualUseCase) gin.HandlerFunc {
 		err := usecase.ActualizeOrders(userID)
 
 		if err != nil {
-			ctx.Status(http.StatusInternalServerError)
+			ctx.Status(http.StatusNoContent)
 			ctx.Abort()
 
 			return
