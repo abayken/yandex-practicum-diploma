@@ -229,3 +229,41 @@ func (hander *Handler) FakeAccural(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusOK, Response{Order: ctx.Param("number"), Status: "PROCESSED", Accrual: 400})
 }
+
+func (handler *Handler) Withdrawals(ctx *gin.Context) {
+	userID := ctx.GetInt("userID")
+
+	withdrawals, err := handler.WithdrawUseCase.Withdrawals(userID)
+
+	if err != nil {
+		ctx.Status(http.StatusInternalServerError)
+
+		return
+	}
+
+	if len(withdrawals) == 0 {
+		ctx.Status(http.StatusNoContent)
+
+		return
+	}
+
+	type WithdrawView struct {
+		Order       string  `json:"order"`
+		Sum         float32 `json:"sum"`
+		ProcessedAt string  `json:"processed_at"`
+	}
+
+	var withdrawalsList []WithdrawView
+
+	for _, withdraw := range withdrawals {
+		withdrawView := WithdrawView{
+			Order:       withdraw.OrderNumber,
+			Sum:         float32(withdraw.Sum) / 100,
+			ProcessedAt: withdraw.AddedAt.Time.Format(time.RFC3339),
+		}
+
+		withdrawalsList = append(withdrawalsList, withdrawView)
+	}
+
+	ctx.JSON(http.StatusOK, withdrawalsList)
+}

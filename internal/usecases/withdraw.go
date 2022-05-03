@@ -40,3 +40,7 @@ func (usecase WithdrawUseCase) Withdraw(userID int, orderNumber string, sum floa
 
 	return err
 }
+
+func (usecase WithdrawUseCase) Withdrawals(userID int) ([]repositories.Withdraw, error) {
+	return usecase.WithdrawsRepo.GetWithdrawals(userID)
+}

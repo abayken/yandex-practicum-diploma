@@ -82,6 +82,7 @@ func GetRouter(cfg Config) *gin.Engine {
 	authorized.GET("/api/user/orders", ActualizeOrders(accrualUseCase), handler.Orders)
 	authorized.GET("/api/user/balance", ActualizeOrders(accrualUseCase), handler.Balance)
 	authorized.POST("/api/user/balance/withdraw", handler.Withdraw)
+	authorized.GET("/api/user/balance/withdrawals", handler.Withdrawals)
 
 	return router
 }
