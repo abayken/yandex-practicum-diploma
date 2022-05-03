@@ -16,6 +16,7 @@ type Handler struct {
 	AuthUseCase     usecases.AuthUseCase
 	OrdersUseCase   usecases.OrderUseCase
 	WithdrawUseCase usecases.WithdrawUseCase
+	AccrualUseCase  usecases.AccrualUseCase
 }
 
 func (handler *Handler) RegisterUser(ctx *gin.Context) {
@@ -90,7 +91,9 @@ func (handler *Handler) AddOrder(ctx *gin.Context) {
 		return
 	}
 
-	orderNumber, err := strconv.Atoi(string(body))
+	orderNumberAsString := string(body)
+
+	orderNumber, err := strconv.Atoi(orderNumberAsString)
 
 	if err != nil {
 		ctx.Status(http.StatusInternalServerError)
@@ -103,6 +106,10 @@ func (handler *Handler) AddOrder(ctx *gin.Context) {
 	added, err := handler.OrdersUseCase.Add(userID, orderNumber)
 
 	if added {
+		go func() {
+			handler.AccrualUseCase.ActualizeOrders(orderNumberAsString)
+		}()
+
 		ctx.Status(http.StatusAccepted)
 
 		return

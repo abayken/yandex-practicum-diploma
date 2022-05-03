@@ -61,14 +61,15 @@ func GetRouter(cfg Config) *gin.Engine {
 		Luhn:          helpers.LuhnChecker{},
 	}
 
+	accrualRepo := repositories.AccrualRepository{BaseURL: cfg.AccuralAddress}
+	accrualUseCase := usecases.AccrualUseCase{OrdersRepository: ordersRepo, AccrualRepository: accrualRepo}
+
 	handler := handlers.Handler{
 		AuthUseCase:     authUseCase,
 		OrdersUseCase:   ordersUseCase,
 		WithdrawUseCase: withdrawUseCase,
+		AccrualUseCase:  accrualUseCase,
 	}
-
-	accrualRepo := repositories.AccrualRepository{BaseURL: cfg.AccuralAddress}
-	accrualUseCase := usecases.AccrualUseCase{OrdersRepository: ordersRepo, AccrualRepository: accrualRepo}
 
 	router.POST("/api/user/register", handler.RegisterUser)
 	router.POST("/api/user/login", handler.LoginUser)
@@ -79,8 +80,8 @@ func GetRouter(cfg Config) *gin.Engine {
 	authorized.Use(SetUserID())
 
 	authorized.POST("/api/user/orders", handler.AddOrder)
-	authorized.GET("/api/user/orders", ActualizeOrders(accrualUseCase), handler.Orders)
-	authorized.GET("/api/user/balance", ActualizeOrders(accrualUseCase), handler.Balance)
+	authorized.GET("/api/user/orders", handler.Orders)
+	authorized.GET("/api/user/balance", handler.Balance)
 	authorized.POST("/api/user/balance/withdraw", handler.Withdraw)
 	authorized.GET("/api/user/balance/withdrawals", handler.Withdrawals)
 

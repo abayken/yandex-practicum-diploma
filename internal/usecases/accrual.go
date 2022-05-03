@@ -9,45 +9,54 @@ type AccrualUseCase struct {
 	AccrualRepository repositories.AccrualRepository
 }
 
-func (usecase AccrualUseCase) ActualizeOrders(userID int) error {
-	orders, err := usecase.OrdersRepository.GetNotFinishedOrders(userID)
+func (usecase AccrualUseCase) ActualizeOrders(orderNumber string) error {
+	orderInfo, err := usecase.AccrualRepository.FetchOrderInfo(orderNumber)
 
 	if err != nil {
 		return err
 	}
 
-	updated := make(chan error)
+	err = usecase.OrdersRepository.Update(orderInfo.Status, int(orderInfo.Accrual*100), orderInfo.Number)
 
-	var updateError error
+	return err
+	// orders, err := usecase.OrdersRepository.GetNotFinishedOrders(userID)
 
-	for _, order := range orders {
-		go usecase.update(updated, order.Number, userID)
+	// if err != nil {
+	// 	return err
+	// }
 
-		err := <-updated
+	// updated := make(chan error)
 
-		if err != nil {
-			updateError = err
-		}
-	}
+	// var updateError error
 
-	return updateError
+	// for _, order := range orders {
+	// 	go usecase.update(updated, order.Number, userID)
+
+	// 	err := <-updated
+
+	// 	if err != nil {
+	// 		updateError = err
+	// 	}
+	// }
+
+	// return updateError
 }
 
-func (usecase AccrualUseCase) update(updated chan error, orderNumber string, userID int) {
-	orderInfo, err := usecase.AccrualRepository.FetchOrderInfo(orderNumber)
+// func (usecase AccrualUseCase) update(updated chan error, orderNumber string, userID int) {
+// 	orderInfo, err := usecase.AccrualRepository.FetchOrderInfo(orderNumber)
 
-	if err != nil {
-		updated <- err
+// 	if err != nil {
+// 		updated <- err
 
-		return
-	}
+// 		return
+// 	}
 
-	err = usecase.OrdersRepository.Update(
-		userID,
-		orderInfo.Status,
-		int(orderInfo.Accrual*100),
-		orderInfo.Number,
-	)
+// 	err = usecase.OrdersRepository.Update(
+// 		userID,
+// 		orderInfo.Status,
+// 		int(orderInfo.Accrual*100),
+// 		orderInfo.Number,
+// 	)
 
-	updated <- err
-}
+// 	updated <- err
+// }

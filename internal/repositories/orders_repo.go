@@ -40,7 +40,7 @@ func (repo OrdersRepository) AddOrder(userID int, orderNumber, status string) er
 func (repo OrdersRepository) GetOrders(userID int) ([]Order, error) {
 	db := repo.Storage.DB
 
-	rows, err := db.Query(context.Background(), "SELECT NUMBER, STATUS, ADDED_AT, ACCRUAL FROM ORDERS WHERE USER_ID = $1", userID)
+	rows, err := db.Query(context.Background(), "SELECT NUMBER, STATUS, ADDED_AT, ACCRUAL FROM ORDERS WHERE USER_ID = $1 ORDER BY ADDED_AT ASC;", userID)
 
 	defer rows.Close()
 
@@ -63,10 +63,10 @@ func (repo OrdersRepository) GetOrders(userID int) ([]Order, error) {
 	return orders, nil
 }
 
-func (repo OrdersRepository) Update(userID int, status string, accrual int, number string) error {
+func (repo OrdersRepository) Update(status string, accrual int, number string) error {
 	db := repo.Storage.DB
 
-	_, err := db.Exec(context.Background(), "UPDATE ORDERS SET STATUS = $1, ACCRUAL = $2 WHERE NUMBER = $3 AND USER_ID = $4", status, accrual, number, userID)
+	_, err := db.Exec(context.Background(), "UPDATE ORDERS SET STATUS = $1, ACCRUAL = $2 WHERE NUMBER = $3", status, accrual, number)
 
 	return err
 }
