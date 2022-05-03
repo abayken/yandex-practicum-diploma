@@ -143,6 +143,12 @@ func (handler *Handler) Orders(ctx *gin.Context) {
 	userID := ctx.GetInt("userID")
 	orders, err := handler.OrdersUseCase.GetOrders(userID)
 
+	if len(orders) == 0 {
+		ctx.Status(http.StatusNoContent)
+
+		return
+	}
+
 	type OrderView struct {
 		Number     string  `json:"number"`
 		Status     string  `json:"status"`
@@ -167,11 +173,7 @@ func (handler *Handler) Orders(ctx *gin.Context) {
 		})
 	}
 
-	if response == nil {
-		ctx.Status(http.StatusNoContent)
-	} else {
-		ctx.JSON(http.StatusOK, response)
-	}
+	ctx.JSON(http.StatusOK, response)
 }
 
 func (handler *Handler) Balance(ctx *gin.Context) {
