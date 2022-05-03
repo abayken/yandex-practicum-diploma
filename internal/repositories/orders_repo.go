@@ -16,6 +16,7 @@ type Order struct {
 	Number  string
 	Status  string
 	AddedAt pgtype.Timestamp
+	Accrual int
 }
 
 func (repo OrdersRepository) GetOrder(userID int, orderNumber string) (Order, error) {
@@ -39,7 +40,7 @@ func (repo OrdersRepository) AddOrder(userID int, orderNumber, status string) er
 func (repo OrdersRepository) GetOrders(userID int) ([]Order, error) {
 	db := repo.Storage.DB
 
-	rows, err := db.Query(context.Background(), "SELECT NUMBER, STATUS, ADDED_AT FROM ORDERS WHERE USER_ID = $1", userID)
+	rows, err := db.Query(context.Background(), "SELECT NUMBER, STATUS, ADDED_AT, ACCRUAL FROM ORDERS WHERE USER_ID = $1", userID)
 
 	defer rows.Close()
 
@@ -52,7 +53,7 @@ func (repo OrdersRepository) GetOrders(userID int) ([]Order, error) {
 	for rows.Next() {
 		var order Order
 
-		err := rows.Scan(&order.Number, &order.Status, &order.AddedAt)
+		err := rows.Scan(&order.Number, &order.Status, &order.AddedAt, &order.Accrual)
 
 		if err == nil {
 			orders = append(orders, order)

@@ -137,10 +137,10 @@ func (handler *Handler) Orders(ctx *gin.Context) {
 	orders, err := handler.OrdersUseCase.GetOrders(userID)
 
 	type OrderView struct {
-		Number     string `json:"number"`
-		Status     string `json:"status"`
-		Accural    string `json:"accural,omitempty"`
-		UploadedAt string `json:"uploaded_at"`
+		Number     string  `json:"number"`
+		Status     string  `json:"status"`
+		Accural    float32 `json:"accural,omitempty"`
+		UploadedAt string  `json:"uploaded_at"`
 	}
 
 	if err != nil {
@@ -156,6 +156,7 @@ func (handler *Handler) Orders(ctx *gin.Context) {
 			Number:     order.Number,
 			Status:     order.Status,
 			UploadedAt: order.AddedAt.Time.Format(time.RFC3339),
+			Accural:    float32(order.Accrual) / 100,
 		})
 	}
 
@@ -227,7 +228,7 @@ func (hander *Handler) FakeAccural(ctx *gin.Context) {
 		Accrual float32 `json:"accrual,omitempty"`
 	}
 
-	ctx.JSON(http.StatusOK, Response{Order: ctx.Param("number"), Status: "PROCESSED", Accrual: 400})
+	ctx.JSON(http.StatusOK, Response{Order: ctx.Param("number"), Status: "INVALID"})
 }
 
 func (handler *Handler) Withdrawals(ctx *gin.Context) {
