@@ -55,9 +55,11 @@ func (repo OrdersRepository) GetOrders(userID int) ([]Order, error) {
 
 		err := rows.Scan(&order.Number, &order.Status, &order.AddedAt, &order.Accrual)
 
-		if err == nil {
-			orders = append(orders, order)
+		if err != nil {
+			return nil, err
 		}
+
+		orders = append(orders, order)
 	}
 
 	return orders, nil
