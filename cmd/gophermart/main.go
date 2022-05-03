@@ -76,11 +76,11 @@ func GetRouter(cfg Config) *gin.Engine {
 
 	authorized := router.Group("/")
 
-	authorized.Use(SetUserID(), ActualizeOrders(accrualUseCase))
+	authorized.Use(SetUserID())
 
 	authorized.POST("/api/user/orders", handler.AddOrder)
-	authorized.GET("/api/user/orders", handler.Orders)
-	authorized.GET("/api/user/balance", handler.Balance)
+	authorized.GET("/api/user/orders", ActualizeOrders(accrualUseCase), handler.Orders)
+	authorized.GET("/api/user/balance", ActualizeOrders(accrualUseCase), handler.Balance)
 	authorized.POST("/api/user/balance/withdraw", handler.Withdraw)
 
 	return router
