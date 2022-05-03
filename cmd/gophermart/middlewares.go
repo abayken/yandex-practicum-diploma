@@ -33,16 +33,7 @@ func SetUserID() gin.HandlerFunc {
 func ActualizeOrders(usecase usecases.AccrualUseCase) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		userID := ctx.GetInt("userID")
-
-		err := usecase.ActualizeOrders(userID)
-
-		if err != nil {
-			ctx.Status(http.StatusNoContent)
-			ctx.Abort()
-
-			return
-		}
-
+		_ = usecase.ActualizeOrders(userID)
 		ctx.Next()
 	}
 }
