@@ -37,7 +37,7 @@ func (usecase WithdrawUseCase) Withdraw(userID int, orderNumber string, sum floa
 		}
 	} else if err != nil {
 		return err
-	} else {
+	} else if orderInfo.UserID != userID {
 		return &custom_errors.OrderAlreadyAddedError{UserID: orderInfo.UserID}
 	}
 

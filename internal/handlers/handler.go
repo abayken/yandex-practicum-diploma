@@ -249,7 +249,7 @@ func (hander *Handler) FakeAccural(ctx *gin.Context) {
 		Accrual float32 `json:"accrual,omitempty"`
 	}
 
-	ctx.JSON(http.StatusOK, Response{Order: ctx.Param("number"), Status: "PROCESSED", Accrual: 340})
+	ctx.JSON(http.StatusOK, Response{Order: ctx.Param("number"), Status: "PROCESSED", Accrual: 729.98})
 }
 
 func (handler *Handler) Withdrawals(ctx *gin.Context) {
