@@ -6,6 +6,7 @@ import (
 	"github.com/abayken/yandex-practicum-diploma/internal/custom_errors"
 	"github.com/abayken/yandex-practicum-diploma/internal/helpers"
 	"github.com/abayken/yandex-practicum-diploma/internal/repositories"
+	"github.com/jackc/pgx/v4"
 )
 
 type WithdrawUseCase struct {
@@ -16,6 +17,30 @@ type WithdrawUseCase struct {
 }
 
 func (usecase WithdrawUseCase) Withdraw(userID int, orderNumber string, sum float32) error {
+	orderInfo, err := usecase.OrdersRepo.GetOrder(userID, orderNumber)
+
+	if err == pgx.ErrNoRows {
+		order, err := strconv.Atoi(orderNumber)
+
+		if err != nil {
+			return err
+		}
+
+		if !usecase.Luhn.IsValid(order) {
+			return &custom_errors.InvalidOrderNumber{}
+		}
+
+		err = usecase.OrdersRepo.AddOrder(userID, orderNumber, "NEW", 0)
+
+		if err != nil {
+			return err
+		}
+	} else if err != nil {
+		return err
+	} else {
+		return &custom_errors.OrderAlreadyAddedError{UserID: orderInfo.UserID}
+	}
+
 	balance, err := usecase.UserUseCase.GetBalance(userID)
 
 	if err != nil {
@@ -24,16 +49,6 @@ func (usecase WithdrawUseCase) Withdraw(userID int, orderNumber string, sum floa
 
 	if balance.Current < sum {
 		return &custom_errors.InsufficientFundsError{}
-	}
-
-	order, err := strconv.Atoi(orderNumber)
-
-	if err != nil {
-		return err
-	}
-
-	if !usecase.Luhn.IsValid(order) {
-		return &custom_errors.InvalidOrderNumber{}
 	}
 
 	err = usecase.WithdrawsRepo.Add(userID, int(sum*100), orderNumber)

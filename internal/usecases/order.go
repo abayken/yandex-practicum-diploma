@@ -14,9 +14,9 @@ type OrderUseCase struct {
 	Luhn helpers.LuhnChecker
 }
 
-func (usecase OrderUseCase) Add(userID, orderNumber int) (bool, error) {
+func (usecase OrderUseCase) Add(userID, orderNumber int) error {
 	if !usecase.Luhn.IsValid(orderNumber) {
-		return false, &custom_errors.InvalidOrderNumber{}
+		return &custom_errors.InvalidOrderNumber{}
 	}
 
 	order, err := usecase.Repo.GetOrder(userID, strconv.Itoa(orderNumber))
@@ -24,18 +24,14 @@ func (usecase OrderUseCase) Add(userID, orderNumber int) (bool, error) {
 	if err == pgx.ErrNoRows {
 		err := usecase.Repo.AddOrder(userID, strconv.Itoa(orderNumber), "NEW", 0)
 
-		if err != nil {
-			return false, err
-		} else {
-			return true, err
-		}
+		return err
 	}
 
 	if err != nil {
-		return false, err
+		return err
 	}
 
-	return false, &custom_errors.OrderAlreadyAddedError{UserID: order.UserID}
+	return &custom_errors.OrderAlreadyAddedError{UserID: order.UserID}
 }
 
 func (usecase OrderUseCase) GetOrders(userID int) ([]repositories.Order, error) {

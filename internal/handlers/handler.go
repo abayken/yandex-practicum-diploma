@@ -103,9 +103,9 @@ func (handler *Handler) AddOrder(ctx *gin.Context) {
 
 	userID := ctx.GetInt("userID")
 
-	added, err := handler.OrdersUseCase.Add(userID, orderNumber)
+	err = handler.OrdersUseCase.Add(userID, orderNumber)
 
-	if added {
+	if err == nil {
 		go func() {
 			handler.AccrualUseCase.ActualizeOrders(orderNumberAsString)
 		}()
@@ -115,28 +115,27 @@ func (handler *Handler) AddOrder(ctx *gin.Context) {
 		return
 	}
 
-	if err != nil {
-		var invalidOrderNumberError *custom_errors.InvalidOrderNumber
-		var orderAlreadyAddedError *custom_errors.OrderAlreadyAddedError
+	var invalidOrderNumberError *custom_errors.InvalidOrderNumber
+	var orderAlreadyAddedError *custom_errors.OrderAlreadyAddedError
 
-		if errors.As(err, &invalidOrderNumberError) {
-			ctx.Status(http.StatusUnprocessableEntity)
+	if errors.As(err, &invalidOrderNumberError) {
+		ctx.Status(http.StatusUnprocessableEntity)
 
-			return
-		}
-
-		if errors.As(err, &orderAlreadyAddedError) {
-			if orderAlreadyAddedError.UserID == userID {
-				ctx.Status(http.StatusOK)
-			} else {
-				ctx.Status(http.StatusConflict)
-			}
-
-			return
-		}
-
-		ctx.Status(http.StatusInternalServerError)
+		return
 	}
+
+	if errors.As(err, &orderAlreadyAddedError) {
+		if orderAlreadyAddedError.UserID == userID {
+			ctx.Status(http.StatusOK)
+		} else {
+			ctx.Status(http.StatusConflict)
+		}
+
+		return
+	}
+
+	ctx.Status(http.StatusInternalServerError)
+
 }
 
 func (handler *Handler) Orders(ctx *gin.Context) {
@@ -221,11 +220,18 @@ func (handler *Handler) Withdraw(ctx *gin.Context) {
 	if err != nil {
 		var invalidOrderNumberError *custom_errors.InvalidOrderNumber
 		var insufficientFundsError *custom_errors.InsufficientFundsError
+		var orderAlreadyAddedError *custom_errors.OrderAlreadyAddedError
 
 		if errors.As(err, &invalidOrderNumberError) {
 			ctx.Status(http.StatusUnprocessableEntity)
 		} else if errors.As(err, &insufficientFundsError) {
 			ctx.Status(http.StatusPaymentRequired)
+		} else if errors.As(err, &orderAlreadyAddedError) {
+			if orderAlreadyAddedError.UserID == userID {
+				ctx.Status(http.StatusOK)
+			} else {
+				ctx.Status(http.StatusConflict)
+			}
 		} else {
 			ctx.Status(http.StatusInternalServerError)
 		}
