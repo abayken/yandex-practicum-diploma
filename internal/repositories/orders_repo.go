@@ -65,10 +65,10 @@ func (repo OrdersRepository) GetOrders(userID int) ([]Order, error) {
 	return orders, nil
 }
 
-func (repo OrdersRepository) Update(status string, accrual int, number string) error {
+func (repo OrdersRepository) Update(userID int, status string, accrual int, number string) error {
 	db := repo.Storage.DB
 
-	_, err := db.Exec(context.Background(), "UPDATE ORDERS SET STATUS = $1, ACCRUAL = $2 WHERE NUMBER = $3", status, accrual, number)
+	_, err := db.Exec(context.Background(), "UPDATE ORDERS SET STATUS = $1, ACCRUAL = $2 WHERE NUMBER = $3 AND USER_ID = $4", status, accrual, number, userID)
 
 	return err
 }

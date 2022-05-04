@@ -77,7 +77,7 @@ func GetRouter(cfg Config) *gin.Engine {
 
 	authorized := router.Group("/")
 
-	authorized.Use(SetUserID())
+	authorized.Use(SetUserID(), ActualizeOrders(accrualUseCase))
 
 	authorized.POST("/api/user/orders", handler.AddOrder)
 	authorized.GET("/api/user/orders", handler.Orders)
