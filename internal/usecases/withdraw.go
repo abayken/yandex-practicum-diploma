@@ -3,7 +3,7 @@ package usecases
 import (
 	"strconv"
 
-	"github.com/abayken/yandex-practicum-diploma/internal/customErrors"
+	"github.com/abayken/yandex-practicum-diploma/internal/customerrors"
 	"github.com/abayken/yandex-practicum-diploma/internal/helpers"
 	"github.com/abayken/yandex-practicum-diploma/internal/repositories"
 	"github.com/jackc/pgx/v4"
@@ -27,7 +27,7 @@ func (usecase WithdrawUseCase) Withdraw(userID int, orderNumber string, sum floa
 		}
 
 		if !usecase.Luhn.IsValid(order) {
-			return &customErrors.InvalidOrderNumber{}
+			return &customerrors.InvalidOrderNumber{}
 		}
 
 		err = usecase.OrdersRepo.AddOrder(userID, orderNumber, "NEW", 0)
@@ -38,7 +38,7 @@ func (usecase WithdrawUseCase) Withdraw(userID int, orderNumber string, sum floa
 	} else if err != nil {
 		return err
 	} else if orderInfo.UserID != userID {
-		return &customErrors.OrderAlreadyAddedError{UserID: orderInfo.UserID}
+		return &customerrors.OrderAlreadyAddedError{UserID: orderInfo.UserID}
 	}
 
 	balance, err := usecase.UserUseCase.GetBalance(userID)
@@ -48,7 +48,7 @@ func (usecase WithdrawUseCase) Withdraw(userID int, orderNumber string, sum floa
 	}
 
 	if balance.Current < sum {
-		return &customErrors.InsufficientFundsError{}
+		return &customerrors.InsufficientFundsError{}
 	}
 
 	err = usecase.WithdrawsRepo.Add(userID, int(sum*100), orderNumber)

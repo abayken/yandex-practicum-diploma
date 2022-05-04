@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/abayken/yandex-practicum-diploma/internal/customErrors"
+	"github.com/abayken/yandex-practicum-diploma/internal/customerrors"
 	"github.com/abayken/yandex-practicum-diploma/internal/usecases"
 	"github.com/gin-gonic/gin"
 )
@@ -36,7 +36,7 @@ func (handler *Handler) RegisterUser(ctx *gin.Context) {
 	token, err := handler.AuthUseCase.Register(request.Login, request.Password)
 
 	if err != nil {
-		var userExistsError *customErrors.AlreadyExistsUserError
+		var userExistsError *customerrors.AlreadyExistsUserError
 		if errors.As(err, &userExistsError) {
 			ctx.Status(http.StatusConflict)
 		} else {
@@ -67,7 +67,7 @@ func (handler *Handler) LoginUser(ctx *gin.Context) {
 	token, err := handler.AuthUseCase.Login(request.Login, request.Password)
 
 	if err != nil {
-		var invalidCredsError *customErrors.InvalidCredentialsError
+		var invalidCredsError *customerrors.InvalidCredentialsError
 		if errors.As(err, &invalidCredsError) {
 			ctx.Status(http.StatusUnauthorized)
 		} else {
@@ -111,8 +111,8 @@ func (handler *Handler) AddOrder(ctx *gin.Context) {
 		return
 	}
 
-	var invalidOrderNumberError *customErrors.InvalidOrderNumber
-	var orderAlreadyAddedError *customErrors.OrderAlreadyAddedError
+	var invalidOrderNumberError *customerrors.InvalidOrderNumber
+	var orderAlreadyAddedError *customerrors.OrderAlreadyAddedError
 
 	if errors.As(err, &invalidOrderNumberError) {
 		ctx.Status(http.StatusUnprocessableEntity)
@@ -208,9 +208,9 @@ func (handler *Handler) Withdraw(ctx *gin.Context) {
 	err := handler.WithdrawUseCase.Withdraw(userID, request.Order, request.Sum)
 
 	if err != nil {
-		var invalidOrderNumberError *customErrors.InvalidOrderNumber
-		var insufficientFundsError *customErrors.InsufficientFundsError
-		var orderAlreadyAddedError *customErrors.OrderAlreadyAddedError
+		var invalidOrderNumberError *customerrors.InvalidOrderNumber
+		var insufficientFundsError *customerrors.InsufficientFundsError
+		var orderAlreadyAddedError *customerrors.OrderAlreadyAddedError
 
 		if errors.As(err, &invalidOrderNumberError) {
 			ctx.Status(http.StatusUnprocessableEntity)

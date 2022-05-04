@@ -2,7 +2,7 @@ package usecases
 
 import (
 	"github.com/abayken/yandex-practicum-diploma/internal/creds"
-	"github.com/abayken/yandex-practicum-diploma/internal/customErrors"
+	"github.com/abayken/yandex-practicum-diploma/internal/customerrors"
 	"github.com/abayken/yandex-practicum-diploma/internal/repositories"
 	"github.com/jackc/pgx/v4"
 )
@@ -22,7 +22,7 @@ func (usecase AuthUseCase) Register(login, password string) (string, error) {
 	}
 
 	if exists {
-		return "", &customErrors.AlreadyExistsUserError{}
+		return "", &customerrors.AlreadyExistsUserError{}
 	} else {
 		id, err := usecase.Repository.Create(login, password)
 
@@ -45,11 +45,11 @@ func (usecase AuthUseCase) Login(login, password string) (string, error) {
 
 			return jwt, nil
 		} else {
-			return "", &customErrors.InvalidCredentialsError{}
+			return "", &customerrors.InvalidCredentialsError{}
 		}
 	} else {
 		if err == pgx.ErrNoRows {
-			return "", &customErrors.InvalidCredentialsError{}
+			return "", &customerrors.InvalidCredentialsError{}
 		} else {
 			return "", err
 		}
