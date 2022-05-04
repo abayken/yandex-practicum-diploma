@@ -10,15 +10,6 @@ type AccrualUseCase struct {
 }
 
 func (usecase AccrualUseCase) ActualizeOrders(userID int) error {
-	// orderInfo, err := usecase.AccrualRepository.FetchOrderInfo(orderNumber)
-
-	// if err != nil {
-	// 	return err
-	// }
-
-	// err = usecase.OrdersRepository.Update(orderInfo.Status, int(orderInfo.Accrual*100), orderInfo.Number)
-
-	// return err
 	orders, err := usecase.OrdersRepository.GetNotFinishedOrders(userID)
 
 	if err != nil {

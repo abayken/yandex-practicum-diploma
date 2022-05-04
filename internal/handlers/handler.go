@@ -106,10 +106,6 @@ func (handler *Handler) AddOrder(ctx *gin.Context) {
 	err = handler.OrdersUseCase.Add(userID, orderNumber)
 
 	if err == nil {
-		// go func() {
-		// 	handler.AccrualUseCase.ActualizeOrders(userID)
-		// }()
-
 		ctx.Status(http.StatusAccepted)
 
 		return

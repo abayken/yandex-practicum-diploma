@@ -17,7 +17,6 @@ type OrderInfo struct {
 }
 
 func (repo AccrualRepository) FetchOrderInfo(orderNumber string) (*OrderInfo, error) {
-	//return &OrderInfo{Number: orderNumber, Status: "PROCESSED", Accrual: 350}, nil
 	url := fmt.Sprintf("%s/api/orders/%s", repo.BaseURL, orderNumber)
 	response, err := http.Get(url)
 
