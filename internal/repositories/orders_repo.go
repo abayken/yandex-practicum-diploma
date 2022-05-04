@@ -42,11 +42,11 @@ func (repo OrdersRepository) GetOrders(userID int) ([]Order, error) {
 
 	rows, err := db.Query(context.Background(), "SELECT NUMBER, STATUS, ADDED_AT, ACCRUAL FROM ORDERS WHERE USER_ID = $1 ORDER BY ADDED_AT ASC;", userID)
 
-	defer rows.Close()
-
 	if err != nil {
 		return nil, err
 	}
+
+	defer rows.Close()
 
 	orders := []Order{}
 

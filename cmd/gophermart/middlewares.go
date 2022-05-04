@@ -17,7 +17,7 @@ func SetUserID() gin.HandlerFunc {
 			ctx.Status(http.StatusUnauthorized)
 			ctx.Abort()
 		} else {
-			id, err := creds.Creds{}.Id(token)
+			id, err := creds.Creds{}.ID(token)
 
 			if err != nil {
 				ctx.Status(http.StatusInternalServerError)

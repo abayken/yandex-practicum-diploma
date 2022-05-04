@@ -2,7 +2,7 @@ package usecases
 
 import (
 	"github.com/abayken/yandex-practicum-diploma/internal/creds"
-	"github.com/abayken/yandex-practicum-diploma/internal/custom_errors"
+	"github.com/abayken/yandex-practicum-diploma/internal/customErrors"
 	"github.com/abayken/yandex-practicum-diploma/internal/repositories"
 	"github.com/jackc/pgx/v4"
 )
@@ -22,7 +22,7 @@ func (usecase AuthUseCase) Register(login, password string) (string, error) {
 	}
 
 	if exists {
-		return "", &custom_errors.AlreadyExistsUserError{}
+		return "", &customErrors.AlreadyExistsUserError{}
 	} else {
 		id, err := usecase.Repository.Create(login, password)
 
@@ -30,7 +30,7 @@ func (usecase AuthUseCase) Register(login, password string) (string, error) {
 			return "", err
 		}
 
-		jwt := usecase.Creds.BuildJWT(creds.UserModel{Login: login, Id: id})
+		jwt := usecase.Creds.BuildJWT(creds.UserModel{Login: login, ID: id})
 
 		return jwt, nil
 	}
@@ -41,15 +41,15 @@ func (usecase AuthUseCase) Login(login, password string) (string, error) {
 
 	if err == nil {
 		if user.Login == login && user.Password == password {
-			jwt := usecase.Creds.BuildJWT(creds.UserModel{Login: user.Login, Id: user.Id})
+			jwt := usecase.Creds.BuildJWT(creds.UserModel{Login: user.Login, ID: user.ID})
 
 			return jwt, nil
 		} else {
-			return "", &custom_errors.InvalidCredentialsError{}
+			return "", &customErrors.InvalidCredentialsError{}
 		}
 	} else {
 		if err == pgx.ErrNoRows {
-			return "", &custom_errors.InvalidCredentialsError{}
+			return "", &customErrors.InvalidCredentialsError{}
 		} else {
 			return "", err
 		}

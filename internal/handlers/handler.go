@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/abayken/yandex-practicum-diploma/internal/custom_errors"
+	"github.com/abayken/yandex-practicum-diploma/internal/customErrors"
 	"github.com/abayken/yandex-practicum-diploma/internal/usecases"
 	"github.com/gin-gonic/gin"
 )
@@ -36,7 +36,7 @@ func (handler *Handler) RegisterUser(ctx *gin.Context) {
 	token, err := handler.AuthUseCase.Register(request.Login, request.Password)
 
 	if err != nil {
-		var userExistsError *custom_errors.AlreadyExistsUserError
+		var userExistsError *customErrors.AlreadyExistsUserError
 		if errors.As(err, &userExistsError) {
 			ctx.Status(http.StatusConflict)
 		} else {
@@ -67,7 +67,7 @@ func (handler *Handler) LoginUser(ctx *gin.Context) {
 	token, err := handler.AuthUseCase.Login(request.Login, request.Password)
 
 	if err != nil {
-		var invalidCredsError *custom_errors.InvalidCredentialsError
+		var invalidCredsError *customErrors.InvalidCredentialsError
 		if errors.As(err, &invalidCredsError) {
 			ctx.Status(http.StatusUnauthorized)
 		} else {
@@ -111,8 +111,8 @@ func (handler *Handler) AddOrder(ctx *gin.Context) {
 		return
 	}
 
-	var invalidOrderNumberError *custom_errors.InvalidOrderNumber
-	var orderAlreadyAddedError *custom_errors.OrderAlreadyAddedError
+	var invalidOrderNumberError *customErrors.InvalidOrderNumber
+	var orderAlreadyAddedError *customErrors.OrderAlreadyAddedError
 
 	if errors.As(err, &invalidOrderNumberError) {
 		ctx.Status(http.StatusUnprocessableEntity)
@@ -155,12 +155,6 @@ func (handler *Handler) Orders(ctx *gin.Context) {
 		Status     string  `json:"status"`
 		Accural    float32 `json:"accrual,omitempty"`
 		UploadedAt string  `json:"uploaded_at"`
-	}
-
-	if err != nil {
-		ctx.Status(http.StatusInternalServerError)
-
-		return
 	}
 
 	var response []OrderView
@@ -214,9 +208,9 @@ func (handler *Handler) Withdraw(ctx *gin.Context) {
 	err := handler.WithdrawUseCase.Withdraw(userID, request.Order, request.Sum)
 
 	if err != nil {
-		var invalidOrderNumberError *custom_errors.InvalidOrderNumber
-		var insufficientFundsError *custom_errors.InsufficientFundsError
-		var orderAlreadyAddedError *custom_errors.OrderAlreadyAddedError
+		var invalidOrderNumberError *customErrors.InvalidOrderNumber
+		var insufficientFundsError *customErrors.InsufficientFundsError
+		var orderAlreadyAddedError *customErrors.OrderAlreadyAddedError
 
 		if errors.As(err, &invalidOrderNumberError) {
 			ctx.Status(http.StatusUnprocessableEntity)
@@ -238,7 +232,7 @@ func (handler *Handler) Withdraw(ctx *gin.Context) {
 	ctx.Status(http.StatusOK)
 }
 
-func (hander *Handler) FakeAccural(ctx *gin.Context) {
+func (handler *Handler) FakeAccural(ctx *gin.Context) {
 	type Response struct {
 		Order   string  `json:"order"`
 		Status  string  `json:"status"`

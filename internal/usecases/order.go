@@ -3,7 +3,7 @@ package usecases
 import (
 	"strconv"
 
-	"github.com/abayken/yandex-practicum-diploma/internal/custom_errors"
+	"github.com/abayken/yandex-practicum-diploma/internal/customErrors"
 	"github.com/abayken/yandex-practicum-diploma/internal/helpers"
 	"github.com/abayken/yandex-practicum-diploma/internal/repositories"
 	"github.com/jackc/pgx/v4"
@@ -16,7 +16,7 @@ type OrderUseCase struct {
 
 func (usecase OrderUseCase) Add(userID, orderNumber int) error {
 	if !usecase.Luhn.IsValid(orderNumber) {
-		return &custom_errors.InvalidOrderNumber{}
+		return &customErrors.InvalidOrderNumber{}
 	}
 
 	order, err := usecase.Repo.GetOrder(userID, strconv.Itoa(orderNumber))
@@ -31,7 +31,7 @@ func (usecase OrderUseCase) Add(userID, orderNumber int) error {
 		return err
 	}
 
-	return &custom_errors.OrderAlreadyAddedError{UserID: order.UserID}
+	return &customErrors.OrderAlreadyAddedError{UserID: order.UserID}
 }
 
 func (usecase OrderUseCase) GetOrders(userID int) ([]repositories.Order, error) {

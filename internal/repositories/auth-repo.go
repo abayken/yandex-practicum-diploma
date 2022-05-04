@@ -11,7 +11,7 @@ type AuthRepository struct {
 }
 
 type User struct {
-	Id       int
+	ID       int
 	Login    string
 	Password string
 }
@@ -43,7 +43,7 @@ func (repo *AuthRepository) Get(login, password string) (User, error) {
 
 	var user User
 
-	err := db.QueryRow(context.Background(), "SELECT ID, LOGIN, PASSWORD FROM USERS WHERE LOGIN = $1", login).Scan(&user.Id, &user.Login, &user.Password)
+	err := db.QueryRow(context.Background(), "SELECT ID, LOGIN, PASSWORD FROM USERS WHERE LOGIN = $1", login).Scan(&user.ID, &user.Login, &user.Password)
 
 	return user, err
 }
