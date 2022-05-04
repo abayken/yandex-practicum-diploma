@@ -22,7 +22,7 @@ func (usecase OrderUseCase) Add(userID, orderNumber int) (bool, error) {
 	order, err := usecase.Repo.GetOrder(userID, strconv.Itoa(orderNumber))
 
 	if err == pgx.ErrNoRows {
-		err := usecase.Repo.AddOrder(userID, strconv.Itoa(orderNumber), "NEW")
+		err := usecase.Repo.AddOrder(userID, strconv.Itoa(orderNumber), "NEW", 0)
 
 		if err != nil {
 			return false, err

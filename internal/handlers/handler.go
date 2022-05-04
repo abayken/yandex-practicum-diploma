@@ -143,6 +143,12 @@ func (handler *Handler) Orders(ctx *gin.Context) {
 	userID := ctx.GetInt("userID")
 	orders, err := handler.OrdersUseCase.GetOrders(userID)
 
+	if err != nil {
+		ctx.Status(http.StatusInternalServerError)
+
+		return
+	}
+
 	if len(orders) == 0 {
 		ctx.Status(http.StatusNoContent)
 
@@ -237,7 +243,7 @@ func (hander *Handler) FakeAccural(ctx *gin.Context) {
 		Accrual float32 `json:"accrual,omitempty"`
 	}
 
-	ctx.JSON(http.StatusOK, Response{Order: ctx.Param("number"), Status: "INVALID"})
+	ctx.JSON(http.StatusOK, Response{Order: ctx.Param("number"), Status: "PROCESSED", Accrual: 340})
 }
 
 func (handler *Handler) Withdrawals(ctx *gin.Context) {

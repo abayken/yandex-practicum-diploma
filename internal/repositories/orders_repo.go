@@ -29,10 +29,10 @@ func (repo OrdersRepository) GetOrder(userID int, orderNumber string) (Order, er
 	return order, err
 }
 
-func (repo OrdersRepository) AddOrder(userID int, orderNumber, status string) error {
+func (repo OrdersRepository) AddOrder(userID int, orderNumber, status string, accrual int) error {
 	db := repo.Storage.DB
 
-	_, err := db.Exec(context.Background(), "INSERT INTO ORDERS (USER_ID, NUMBER, STATUS) VALUES ($1, $2, $3)", userID, orderNumber, status)
+	_, err := db.Exec(context.Background(), "INSERT INTO ORDERS (USER_ID, NUMBER, STATUS, ACCRUAL) VALUES ($1, $2, $3, $4)", userID, orderNumber, status, accrual)
 
 	return err
 }
