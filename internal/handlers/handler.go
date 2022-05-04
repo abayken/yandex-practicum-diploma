@@ -157,7 +157,7 @@ func (handler *Handler) Orders(ctx *gin.Context) {
 	type OrderView struct {
 		Number     string  `json:"number"`
 		Status     string  `json:"status"`
-		Accural    float32 `json:"accural,omitempty"`
+		Accural    float32 `json:"accrual,omitempty"`
 		UploadedAt string  `json:"uploaded_at"`
 	}
 
